@@ -1,13 +1,9 @@
 import { Controller, Post, Patch, Body, UseGuards, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { Request } from 'express';
 
-interface AuthenticatedRequest extends Request {
-  user: { id: number; username: string };
+interface AuthRequest extends Request {
+  user: { id: number; username: string }; // comes from JWT payload
 }
 
 @Controller('users')
@@ -15,18 +11,21 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('register')
-  async register(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  async register(@Body() body: { username: string; phone: string; password: string }) {
+    const { username, phone, password } = body;
+    return this.usersService.register(username, phone, password);
   }
 
   @Post('login')
-  async login(@Body() loginUserDto: LoginUserDto) {
-    return this.usersService.login(loginUserDto);
+  async login(@Body() body: { usernameOrPhone: string; password: string }) {
+    const { usernameOrPhone, password } = body;
+    return this.usersService.login(usernameOrPhone, password);
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch('profile')
-  async updateProfile(@Req() req: AuthenticatedRequest, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.updateUser(req.user.id, updateUserDto);
+  async updateProfile(@Req() req: AuthRequest, @Body() body: { username?: string; phone?: string; password?: string }) {
+    const userId = req.user.id;
+    return this.usersService.updateProfile(userId, body);
   }
 }

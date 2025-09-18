@@ -13,8 +13,6 @@ export class CreateUserDto {
   @IsPhoneNumber('LB')
   phone: string;
 
-  @IsDateString()
-  dob: string; // format: YYYY-MM-DD
 
   @IsString()
   @MinLength(6)

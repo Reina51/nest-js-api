@@ -1,17 +1,13 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
-import { User } from './entities/user.entity';
+import { PrismaService } from '../../prisma/prisma.service';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User]),
-    JwtModule.register({ secret: process.env.JWT_SECRET || 'mysecret' }),
-  ],
-  providers: [UsersService],
   controllers: [UsersController],
+  providers: [UsersService, PrismaService],
+  imports: [JwtModule.register({ secret: process.env.JWT_SECRET })],
   exports: [UsersService],
 })
 export class UsersModule {}
